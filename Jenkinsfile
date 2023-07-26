@@ -2,7 +2,7 @@
 
 pipeline{
 
-    agent none
+    agent any
 
     parameters{
 
@@ -24,7 +24,7 @@ pipeline{
         }
         stage('Unit Test maven'){
         when { expression {  params.action == 'create' } }
-          agent {
+          agent any {
                 docker { image 'maven:3.8.3-adoptopenjdk-8' }
             }
             steps{
