@@ -23,9 +23,9 @@ pipeline{
 
         }
         stage('Unit Test maven'){
-        
+        when { expression {  params.action == 'create' } }
           agent {
-                docker { image 'maven:3.8.3-adoptopenjdk-8' }
+                docker { image 'maven:3.8.6-adoptopenjdk-8' }
             }
             steps{
                script{
