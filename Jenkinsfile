@@ -7,7 +7,7 @@ pipeline{
     parameters{
 
         choice(name: 'action', choices: 'create\ndelete', description: 'Choose create/Destroy')
-        
+
     }
 
     stages{
@@ -21,6 +21,18 @@ pipeline{
                )
              }
 
+        }
+        stage('Unit Test maven'){
+        when { expression {  params.action == 'create' } }
+          agent {
+                docker { image 'maven:3.8.3-adoptopenjdk-8' }
+            }
+            steps{
+               script{
+                   
+                   mvnTest()
+               }
+            }
         }
 
 
