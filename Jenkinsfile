@@ -85,8 +85,7 @@ pipeline{
          when { expression {  params.action == 'create' } }
             steps{
                script{
-                    // Change the context to the correct directory
-                    dir("/var/lib/jenkins/workspace/java_app@2/") {                   
+                                 
                      dockerBuild("${params.ImageName}","${params.ImageTag}","${params.DockerHubUser}")
                     }
                }
