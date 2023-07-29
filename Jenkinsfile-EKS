@@ -88,7 +88,46 @@ pipeline{
                   }
                 }
             }
-        }       
+        } 
+        stage('Delete Deployment on EKS Cluster'){
+            when { expression {  params.action == 'delete' } }
+            steps{
+                script{
+                    def delete = false
+
+                    try{
+                        input message: 'Please confirm to delete the deployment', ok: 'Ready to delete the deployment?'
+                        delete = true
+                    }catch(err){
+                        delete = false
+                        currentBuild.result  = 'UNSTABLE'
+                    }
+
+                    if(delete){
+                        sh """
+                            // kubectl delete deployment <deployment_name>
+                            //  or, if you used kubectl apply with a YAML file
+                             kubectl delete -f deployment.yaml
+                        """
+                    }
+                }
+            }
+        }
+        stage('Delete EKS Cluster : Terraform'){
+            when { expression {  params.action == 'create' } }
+            steps{
+                script{
+                    dir('eks_module') {
+                        sh """
+                            terraform init 
+                            terraform destroy -var 'access_key=$ACCESS_KEY' -var 'secret_key=$SECRET_KEY' -var 'region=${params.Region}' --var-file=./config/terraform.tfvars --auto-approve
+                        """
+                    }
+                }
+            }
+        }
+
+
 
 
 
