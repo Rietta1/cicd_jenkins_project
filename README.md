@@ -1,5 +1,27 @@
 # DevOps CI/CD Project | Jenkins Shared Lib | DevSecOps |
 
+**DevOps Project**
+
+Tools Used: GitHub Actions, Maven (Unit test) Sonarqube (SCA), Sonarqube (QGSC), Trivy (Image Scan), Argo CD, Docker and ECR, EKS 
+
+Security is an integral part of an workflow. It's always recommended to integrate the shift to left security pattern in your pipelines. Better to find security vulnerabilty in the eary stages of SDLC rather than in Production.
+
+Created this project to impletement the Security in our DevOps pipeline.
+
+Step 1: Developer pushes code to GitHub
+
+Step 2: Workflow gets triggered due to push action
+
+Step 3: SCA is done with Sonarqube
+
+Step 4: QGSC is done with Sonarqube
+
+Step 5: Docker image is built and pushed to DockerHub and ECR
+
+Step 6: Application is deployed to EKS Cluster
+
+
+
 ### Tasks
 This projects shows the a full cicd configuration for a java app, involving the use of 
 
@@ -16,12 +38,13 @@ installed on the server are :
 - Git
 - maven
 - Docker
-- Tinny
+- Trivy
 - Kubectl
 - Sonarqube container is used
 - AWS cli
 - Terraform
 - Kubectl (version:1.23)
+
 
 ### Step 1
  Lunch an ubuntu instance , t2 medium and 20gb storage, add port 8080 and 9000 to the security group for access to jenkins and sonarqube respectivly.
@@ -71,6 +94,17 @@ sudo chmod 777 /var/run/docker.sock
 
 ```
 
+Grant Jenkins user and Ubuntu user permission to docker deamon.
+
+```
+sudo su - 
+sudo usermod -aG docker jenkins
+sudo usermod -aG docker ubuntu
+sudo systemctl restart docker
+
+```
+
+
 **Install Sonarqube**
 
 ```
@@ -113,7 +147,7 @@ Create a pipeline `java_app`, *no of build* , *git* add the url of your github, 
 
 Go to pipline syntax *git* and the url and branch and generate syntax and add it to your pipeline checkout stage.
 
-Go to dashboard on jenkins, manage jenkins, configure system, global pipeline libraries and add library name`jenkins_shared_lib` and add the branch `main`, modern SCM , git , the git library url, apply and save. 
+Go to dashboard on jenkins, manage jenkins, configure system, global pipeline libraries and add library name`jenkins_shared_lib` and add the branch at default `main`, modern SCM , git , the git library url, apply and save. 
 
 Go to dashboard, manage plugin , 
 - install sonarqube scanner for jenkins, 
@@ -122,23 +156,24 @@ Go to dashboard, manage plugin ,
 - sonar quality gates, 
 - quality gates, 
 - kubectl
+- note: when using docker agent, install docker pipeline
 
 Login into sonarqube and change password, but user and password is admin.
 
 **To configure Static code analysis: Sonarqube `http://54.245.66.159:9000`**
-Go to Administration , security, user , tokens and generate a token, copy the token, go to jenkins, manage jenkins , configure system , SonarQube servers( check env var, name= sonar , add the sonar url), apply save. Go back click on add , jenkins, global credentials kind = secret text, add the token copied from sonarqube server, save and apply
+Go to Administration , security, user , tokens and generate a token, copy the token, go to jenkins, manage jenkins , configure system , SonarQube servers( check env var, name= sonar , add the sonar url), apply save. Go back to Sonarqube servers ,click on 'add' , jenkins, global credentials kind = secret text, add the token copied from sonarqube server, save and apply
 
 **To configure Quality Gate Status Check : `http://54.245.66.159:9000`**
 Go to Administration, configuration, webhook, create (add name and jenkins url/sonarqube-webhook/ `http://54.245.66.159:8080/sonarqube-webhook/`)
 
 **To configure docker**
-Go to pipeline syntax = withCredentials: bind Credntials with variables , and create one using secret text and the password , then go and use username(USER) and password(PASS) seperatedfor docker
+Go to manage jenkins, add credentials, add username and password then, Go to pipeline syntax and create 'withCredentials: bind Credntials with variables',using Username and password (separated), then go and use username(USER) and password(PASS) add that to your shared lib or jenkinsfile.
 
 
 
 **To connect AWS to Jenkins**
 
-Go to plugins and install CloudBees AWS CredentialsVersion, Go to pipeline syntax = withCredentials: bind Credntials with variables , and create one using aws credentials, add your username and the password ,
+Go to plugins and install CloudBees AWS Credentials Version, Go to pipeline syntax = withCredentials: bind Credntials with variables , and create one using aws credentials, add Access Key ID and Secret Access Key.
 
 OR 
 
@@ -186,4 +221,20 @@ mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$P
 which kubectl
 sudo cp kubectl /usr/local/bin
 https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
+
+
 ```
+
+Error handling for Deploying to EKS incase if you face it
+
+```
+aws configure --profile eksadmin
+export AWS_DEFAULT_PROFILE="eksadmin"
+kubectl -n kube-system get configmap aws-auth -o yaml
+kubectl -n kube-system edit configmap aws-auth
+aws eks update-kubeconfig --name demo-cluster1 --region us-west-2
+
+https://www.agilepartner.net/en/adding-users-to-your-eks-cluster/
+```
+
+
