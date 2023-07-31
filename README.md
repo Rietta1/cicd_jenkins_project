@@ -2,7 +2,8 @@
 
 
 
-![devopsCICD drawio](https://github.com/Rietta1/java_app/assets/101978292/0913481e-1003-4c4c-9474-6a1e57c837db)
+![devopsCICD](https://github.com/Rietta1/java_app/assets/101978292/9a4b6a2b-590c-4c72-9037-31eb2aa8893e)
+
 
 **DevOps Project**
 Tools Used: GitHub Actions, Maven (Unit test) Sonarqube (SCA), Sonarqube (QGSC), Trivy (Image Scan), Argo CD, Docker and ECR, EKS 
